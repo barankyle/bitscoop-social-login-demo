@@ -125,6 +125,10 @@ module.exports = function(event, context, callback) {
 					timestamps: false
 				});
 
+				//When the user is redirected back to the application, the session token in the session cookie
+				//should be used to ensure that the connection being authenticated was created for the right user.
+				//The user must have a valid Connection ID in the redirect URL and have an active Association Session
+				//for that Connection.
 				filter = {
 					where: {
 						token: associationId,
@@ -161,6 +165,7 @@ module.exports = function(event, context, callback) {
 				return Promise.resolve(connection);
 			});
 
+		//If logging in, there should be a user for that Connection, so retrieve the user.
 		if (type === 'login') {
 			promise = promise
 				.then(function(connection) {
@@ -174,6 +179,8 @@ module.exports = function(event, context, callback) {
 						});
 				});
 		}
+		//If signing up, make sure no other users have signed up with that social account.
+		//If not, then create a new user linked to that Connection and save any additional information from that service.
 		else if (type === 'signup') {
 			promise = promise
 				.then(function(connection) {
@@ -328,6 +335,8 @@ module.exports = function(event, context, callback) {
 				});
 		}
 
+		//Either a user was retrieved for a login or created for a signup.
+		//Create a new login session for that user.
 		promise = promise
 			.then(function(user) {
 				if (!user) {

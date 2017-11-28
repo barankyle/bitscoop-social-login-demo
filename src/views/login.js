@@ -97,6 +97,12 @@ module.exports = function(event, context, callback) {
 				timestamps: false
 			});
 
+			//One way of authenticating the user is to create an Association Session with a random token and the Connection ID.
+			//A short-lived cookie is set that contains the session token.
+			//The token is pulled from the cookie when the user is redirected back to the application and used to
+			//ensure that the Connection being completed was created by that user and not someone else.
+			//A malicious user hitting the 'complete' endpoint with a random Connection ID would not have a session token
+			//that matched any active Association Sessions and would be unable to run the complete logic.
 			var cookieString = 'social_demo_session_id=' + token + '; domain=' + process.env.SITE_DOMAIN + '; expires=' + expiration + '; secure=true; http_only=true';
 
 			return associationSessions.sync()
